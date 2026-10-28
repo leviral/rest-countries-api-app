@@ -153,6 +153,10 @@ svg[width][height] {
 button {
   background: none;
   border: none;
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 /* Form elements use OS-level fonts and ignore font inheritance by default. */

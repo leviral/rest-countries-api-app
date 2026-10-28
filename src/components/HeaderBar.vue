@@ -9,8 +9,9 @@
 </template>
 
 <script setup lang="ts">
-import DarkModeIcon from '@/assets/icons/dark_mode.svg?component';
 import { useDark, useToggle } from '@vueuse/core';
+
+import DarkModeIcon from '@/assets/icons/dark_mode.svg?component';
 
 const isDark = useDark({
   selector: ':root',
@@ -24,12 +25,12 @@ const toggleDark = useToggle(isDark);
 
 <style scoped lang="scss">
 .header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
   background-color: var(--color-elements);
-  padding: var(--space-48) var(--space-24);
   box-shadow: 0 1px 5px rgb(from var(--color-text) r g b / 30%);
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-48) var(--space-24);
 
   :root[data-theme='dark'] & {
     box-shadow: 0 1px 5px var(--color-background);
@@ -41,13 +42,16 @@ const toggleDark = useToggle(isDark);
   }
 
   > button {
-    display: flex;
-    gap: var(--space-14);
     align-items: center;
+    border-radius: var(--space-4);
+    display: flex;
     font-weight: var(--font-semi-bold);
+    gap: var(--space-14);
+    padding-inline-end: 2px;
 
-    &:focus:not(:focus-visible) {
-      outline: none;
+    &:focus-visible {
+      outline: 1px solid var(--color-text);
+      outline-offset: 2px;
     }
   }
 }

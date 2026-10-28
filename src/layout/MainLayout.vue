@@ -8,9 +8,10 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue';
+
 import HeaderBar from '@/components/HeaderBar.vue';
 import { useAppStore } from '@/stores/store';
-import { onMounted } from 'vue';
 
 const { getData } = useAppStore();
 
@@ -21,9 +22,9 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .page__wrapper {
+  background-color: var(--color-background);
   display: flex;
   flex-direction: column;
-  background-color: var(--color-background);
   min-block-size: inherit;
 }
 

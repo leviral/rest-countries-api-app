@@ -1,6 +1,7 @@
-import type { Country } from '@/types/country';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+
+import type { Country } from '@/types/country';
 
 export const useAppStore = defineStore('app-store', () => {
   const data = ref<Array<Country>>();
