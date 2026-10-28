@@ -1,8 +1,4 @@
 export default {
-  extends: ['stylelint-config-recommended-scss'],
-  plugins: ['stylelint-order'],
+  extends: ['stylelint-config-recommended-scss', 'stylelint-config-recess-order'],
   customSyntax: 'postcss-html',
-  rules: {
-    'order/properties-alphabetical-order': true,
-  },
 };

@@ -26,10 +26,10 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .page__wrapper {
-  background-color: var(--color-background);
   display: flex;
   flex-direction: column;
   min-block-size: inherit;
+  background-color: var(--color-background);
 }
 
 .page__content {

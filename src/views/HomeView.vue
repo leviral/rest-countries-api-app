@@ -22,19 +22,17 @@
     </section>
     <section class="content__main-wrapper">
       <div v-for="country in filteredCountries" :key="country.name" class="content__card">
-        <div
+        <img
           class="content__card-flag"
-          v-html="svgCache[country.flags.svg]"
-          role="img"
-          :aria-label="`${country.name} flag`"
-        ></div>
+          :src="country.flags.svg"
+          :alt="`${country.name} flag`"
+          loading="lazy"
+        />
         <div class="content__card-text">
           <h1>{{ country.name }}</h1>
-          <div class="content__card-text-details">
-            <p><strong>Population: </strong>{{ country.population }}</p>
-            <p><strong>Region: </strong>{{ country.region }}</p>
-            <p><strong>Capital: </strong>{{ country.capital }}</p>
-          </div>
+          <p><strong>Population: </strong>{{ country.population }}</p>
+          <p><strong>Region: </strong>{{ country.region }}</p>
+          <p><strong>Capital: </strong>{{ country.capital }}</p>
         </div>
       </div>
     </section>
@@ -42,7 +40,7 @@
 
   <ul id="filter-popover" popover class="content__popover">
     <li v-for="(continent, index) in continents" :key="index">
-      <button>
+      <button @click="currentContinentFilter = continent">
         <span>{{ continent }}</span>
       </button>
     </li>
@@ -50,39 +48,33 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
 import ArrowDownIcon from '@/assets/icons/arrow_down.svg?component';
 import ArrowUpIcon from '@/assets/icons/arrow_up.svg?component';
 import SearchIcon from '@/assets/icons/search.svg?component';
-import { useAppStore } from '@/stores/store';
-import type { Country } from '@/types/country';
+import type { Country, CountryRegion } from '@/types/country';
 
 const props = defineProps<{
   data: Country[];
 }>();
 
-const { getSVGFlag, svgCache } = useAppStore();
 const search = ref('');
 const popoverOpen = ref(false);
+const currentContinentFilter = ref<CountryRegion | null>(null);
 
-const continents = ['Africa', 'America', 'Asia', 'Europe', 'Oceania'];
+const continents: CountryRegion[] = ['Africa', 'America', 'Asia', 'Europe', 'Oceania'];
 
 const filteredCountries = computed(() => {
   const query = search.value.trim().toLocaleLowerCase();
 
-  return props.data.filter((country) => country.name.toLocaleLowerCase().includes(query));
+  return props.data.filter((country) =>
+    currentContinentFilter.value
+      ? country.name.toLocaleLowerCase().includes(query) &&
+        country.region === currentContinentFilter.value
+      : country.name.toLocaleLowerCase().includes(query),
+  );
 });
-
-watch(
-  filteredCountries,
-  (countries) => {
-    for (const country of countries) {
-      void getSVGFlag(country.flags.svg);
-    }
-  },
-  { immediate: true },
-);
 </script>
 
 <style lang="scss" scoped>
@@ -105,15 +97,15 @@ watch(
 }
 
 .content__input-wrapper {
+  display: flex;
+  gap: var(--space-24);
   align-items: center;
+  max-inline-size: 450px;
+  padding: var(--space-16) var(--space-32);
+  color: var(--color-input);
   background-color: var(--color-elements);
   border-radius: var(--space-8);
   box-shadow: 0 0 5px rgb(from var(--color-text) r g b / 30%);
-  color: var(--color-input);
-  display: flex;
-  gap: var(--space-24);
-  max-inline-size: 450px;
-  padding: var(--space-16) var(--space-32);
 
   :root[data-theme='dark'] & {
     box-shadow: 0 0 5px var(--color-background);
@@ -124,25 +116,25 @@ watch(
   }
 
   > input {
-    background-color: transparent;
-    border: none;
     flex-grow: 1;
     outline: none;
+    background-color: transparent;
+    border: none;
   }
 }
 
 .content__popover-btn {
+  display: flex;
+  gap: var(--space-64);
   align-items: center;
+  justify-content: space-between;
+  max-inline-size: 250px;
+  padding: var(--space-16) var(--space-24) var(--space-16) var(--space-32);
   anchor-name: --popover-anchor;
   background-color: var(--color-elements);
   border-radius: var(--space-8);
 
   box-shadow: 0 0 5px rgb(from var(--color-text) r g b / 30%);
-  display: flex;
-  gap: var(--space-64);
-  justify-content: space-between;
-  max-inline-size: 250px;
-  padding: var(--space-16) var(--space-24) var(--space-16) var(--space-32);
 
   &:focus-visible {
     outline: 1px solid var(--color-text);
@@ -154,19 +146,19 @@ watch(
 }
 
 .content__popover {
+  inset-block-start: calc(anchor(bottom) + var(--space-8));
+  inset-inline-start: anchor(left);
+  inset-inline-end: anchor(right);
+  flex-direction: column;
+  gap: var(--space-4);
+  inline-size: auto;
+  padding: var(--space-16) var(--space-24);
+  position-anchor: --popover-anchor;
   background-color: var(--color-elements);
   border: none;
   border-radius: var(--space-8);
 
   box-shadow: 0 0 5px rgb(from var(--color-text) r g b / 30%);
-  flex-direction: column;
-  gap: var(--space-4);
-  inline-size: auto;
-  inset-block-start: calc(anchor(bottom) + var(--space-8));
-  inset-inline-end: anchor(right);
-  inset-inline-start: anchor(left);
-  padding: var(--space-16) var(--space-24);
-  position-anchor: --popover-anchor;
   scale: 0;
 
   transition:
@@ -187,10 +179,10 @@ watch(
   }
 
   button {
-    border-radius: var(--space-4);
     display: flex;
     inline-size: 100%;
     padding-inline: var(--space-8);
+    border-radius: var(--space-4);
 
     &:focus-visible {
       outline: 1px solid var(--color-text);
@@ -200,19 +192,51 @@ watch(
 
 .content__main-wrapper {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-48);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: var(--space-32);
+
+  align-content: center;
+  justify-items: center;
+  padding-inline: var(--space-24);
 }
 
 .content__card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-  box-shadow: 0 0 5px rgb(from var(--color-text) r g b / 30%);
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 2;
+  inline-size: 100%;
+  max-inline-size: 400px;
+  overflow: hidden;
   background-color: var(--color-elements);
+  border-radius: var(--space-8);
+  box-shadow: 0 0 5px rgb(from var(--color-text) r g b / 30%);
 
   :root[data-theme='dark'] & {
     box-shadow: 0 0 5px var(--color-background);
+  }
+}
+
+.content__card-flag {
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.content__card-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding: var(--space-32);
+  padding-block-start: 0;
+  color: var(--color-text);
+
+  > h1 {
+    margin-block-end: var(--space-12);
+    font-size: var(--space-20);
+    font-weight: var(--font-extra-bold);
+  }
+
+  strong {
+    font-weight: var(--font-semi-bold);
   }
 }
 </style>

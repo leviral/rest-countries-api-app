@@ -1,3 +1,13 @@
+export type CountryRegion =
+  | 'Africa'
+  | 'America'
+  | 'Antarctic'
+  | 'Antarctic Ocean'
+  | 'Asia'
+  | 'Europe'
+  | 'Oceania'
+  | 'Polar';
+
 export interface Country {
   name: string;
   topLevelDomain: string[];
@@ -7,7 +17,7 @@ export interface Country {
   capital?: string;
   altSpellings?: string[];
   subregion: string;
-  region: string;
+  region: CountryRegion;
   population: number;
   latlng?: [number, number];
   demonym: string;
