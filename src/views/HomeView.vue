@@ -1,10 +1,15 @@
 <template>
-  <div class="content__wrapper">
-    <div class="content__upper-wrapper">
+  <main class="content__wrapper">
+    <section class="content__upper-wrapper">
       <label class="content__input-wrapper" for="search-input">
         <SearchIcon aria-hidden="true" />
         <span class="sr-only">Land suchen</span>
-        <input type="search" id="search-input" placeholder="Search for a country..." />
+        <input
+          v-model="search"
+          type="search"
+          id="search-input"
+          placeholder="Search for a country..."
+        />
       </label>
       <button
         class="content__popover-btn"
@@ -14,8 +19,26 @@
         <span>Filter by Region</span>
         <component :is="popoverOpen ? ArrowUpIcon : ArrowDownIcon" />
       </button>
-    </div>
-  </div>
+    </section>
+    <section class="content__main-wrapper">
+      <div v-for="country in filteredCountries" :key="country.name" class="content__card">
+        <div
+          class="content__card-flag"
+          v-html="svgCache[country.flags.svg]"
+          role="img"
+          :aria-label="`${country.name} flag`"
+        ></div>
+        <div class="content__card-text">
+          <h1>{{ country.name }}</h1>
+          <div class="content__card-text-details">
+            <p><strong>Population: </strong>{{ country.population }}</p>
+            <p><strong>Region: </strong>{{ country.region }}</p>
+            <p><strong>Capital: </strong>{{ country.capital }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <ul id="filter-popover" popover class="content__popover">
     <li v-for="(continent, index) in continents" :key="index">
@@ -27,27 +50,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import ArrowDownIcon from '@/assets/icons/arrow_down.svg?component';
 import ArrowUpIcon from '@/assets/icons/arrow_up.svg?component';
 import SearchIcon from '@/assets/icons/search.svg?component';
+import { useAppStore } from '@/stores/store';
+import type { Country } from '@/types/country';
 
+const props = defineProps<{
+  data: Country[];
+}>();
+
+const { getSVGFlag, svgCache } = useAppStore();
+const search = ref('');
 const popoverOpen = ref(false);
 
 const continents = ['Africa', 'America', 'Asia', 'Europe', 'Oceania'];
+
+const filteredCountries = computed(() => {
+  const query = search.value.trim().toLocaleLowerCase();
+
+  return props.data.filter((country) => country.name.toLocaleLowerCase().includes(query));
+});
+
+watch(
+  filteredCountries,
+  (countries) => {
+    for (const country of countries) {
+      void getSVGFlag(country.flags.svg);
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <style lang="scss" scoped>
 .content__wrapper {
   display: flex;
   flex-direction: column;
+  gap: var(--space-32);
 }
 
 .content__upper-wrapper {
   display: flex;
   flex-direction: column;
-  gap: var(--space-64);
+  gap: var(--space-48);
 
   @media (min-width: $bp-tablet) {
     flex-direction: row;
@@ -64,7 +112,7 @@ const continents = ['Africa', 'America', 'Asia', 'Europe', 'Oceania'];
   color: var(--color-input);
   display: flex;
   gap: var(--space-24);
-  max-inline-size: 350px;
+  max-inline-size: 450px;
   padding: var(--space-16) var(--space-32);
 
   :root[data-theme='dark'] & {
@@ -76,7 +124,6 @@ const continents = ['Africa', 'America', 'Asia', 'Europe', 'Oceania'];
   }
 
   > input {
-
     background-color: transparent;
     border: none;
     flex-grow: 1;
@@ -93,6 +140,8 @@ const continents = ['Africa', 'America', 'Asia', 'Europe', 'Oceania'];
   box-shadow: 0 0 5px rgb(from var(--color-text) r g b / 30%);
   display: flex;
   gap: var(--space-64);
+  justify-content: space-between;
+  max-inline-size: 250px;
   padding: var(--space-16) var(--space-24) var(--space-16) var(--space-32);
 
   &:focus-visible {
@@ -146,6 +195,24 @@ const continents = ['Africa', 'America', 'Asia', 'Europe', 'Oceania'];
     &:focus-visible {
       outline: 1px solid var(--color-text);
     }
+  }
+}
+
+.content__main-wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-48);
+}
+
+.content__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  box-shadow: 0 0 5px rgb(from var(--color-text) r g b / 30%);
+  background-color: var(--color-elements);
+
+  :root[data-theme='dark'] & {
+    box-shadow: 0 0 5px var(--color-background);
   }
 }
 </style>

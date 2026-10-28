@@ -2,21 +2,25 @@
   <div class="page__wrapper">
     <HeaderBar />
     <div class="page__content">
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <component :is="Component" :data="data" />
+      </router-view>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 
 import HeaderBar from '@/components/HeaderBar.vue';
 import { useAppStore } from '@/stores/store';
 
-const { getData } = useAppStore();
+const appStore = useAppStore();
+const { data } = storeToRefs(appStore);
 
 onMounted(() => {
-  getData;
+  appStore.getData();
 });
 </script>
 
