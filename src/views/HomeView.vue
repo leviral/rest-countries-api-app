@@ -21,7 +21,12 @@
       </button>
     </section>
     <section class="content__main-wrapper">
-      <div v-for="country in filteredCountries" :key="country.name" class="content__card">
+      <div
+        v-for="country in filteredCountries"
+        :key="country.name"
+        class="content__card"
+        @click="onCardClick(country)"
+      >
         <img
           class="content__card-flag"
           :src="country.flags.svg"
@@ -49,6 +54,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import ArrowDownIcon from '@/assets/icons/arrow_down.svg?component';
 import ArrowUpIcon from '@/assets/icons/arrow_up.svg?component';
@@ -59,6 +65,7 @@ const props = defineProps<{
   data: Country[];
 }>();
 
+const router = useRouter();
 const search = ref('');
 const popoverOpen = ref(false);
 const currentContinentFilter = ref<CountryRegion | null>(null);
@@ -75,6 +82,13 @@ const filteredCountries = computed(() => {
       : country.name.toLocaleLowerCase().includes(query),
   );
 });
+
+const onCardClick = async (country: Country) => {
+  await router.push({
+    name: 'details',
+    params: { id: country.name },
+  });
+};
 </script>
 
 <style lang="scss" scoped>
@@ -93,6 +107,7 @@ const filteredCountries = computed(() => {
     flex-direction: row;
     gap: 0;
     justify-content: space-between;
+    padding-inline: var(--space-24);
   }
 }
 
@@ -192,9 +207,9 @@ const filteredCountries = computed(() => {
 
 .content__main-wrapper {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  grid-auto-rows: auto;
   gap: var(--space-32);
-
   align-content: center;
   justify-items: center;
   padding-inline: var(--space-24);
@@ -204,20 +219,27 @@ const filteredCountries = computed(() => {
   display: grid;
   grid-template-rows: subgrid;
   grid-row: span 2;
+  gap: 0;
   inline-size: 100%;
   max-inline-size: 400px;
   overflow: hidden;
+  cursor: pointer;
   background-color: var(--color-elements);
   border-radius: var(--space-8);
   box-shadow: 0 0 5px rgb(from var(--color-text) r g b / 30%);
+  transition: scale 0.3s ease-in-out;
 
   :root[data-theme='dark'] & {
     box-shadow: 0 0 5px var(--color-background);
   }
+
+  &:hover {
+    scale: 1.02;
+  }
 }
 
 .content__card-flag {
-  block-size: 100%;
+  aspect-ratio: 16/9;
   object-fit: cover;
 }
 
@@ -226,7 +248,6 @@ const filteredCountries = computed(() => {
   flex-direction: column;
   gap: var(--space-12);
   padding: var(--space-32);
-  padding-block-start: 0;
   color: var(--color-text);
 
   > h1 {

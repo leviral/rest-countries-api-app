@@ -32,6 +32,10 @@ const toggleDark = useToggle(isDark);
   background-color: var(--color-elements);
   box-shadow: 0 1px 5px rgb(from var(--color-text) r g b / 30%);
 
+  @media (min-width: $bp-tablet) {
+    padding-inline: var(--space-48);
+  }
+
   :root[data-theme='dark'] & {
     box-shadow: 0 1px 5px var(--color-background);
   }
